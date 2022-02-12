@@ -48,20 +48,21 @@ runs:
       name: Create resource manifest
       run: printf "fx_version 'cerulean'\ngame 'gta5'\n\n${{ inputs.manifest }}" > "../build/fxmanifest.lua"
       shell: bash
-    - if: inputs.build_only || !startsWith(github.ref, 'refs/tags/')
+    - if: inputs.build_only || !startsWith(github.ref, 'refs/tags/v')
       run: exit 0
       shell: bash
-    - if: ${{ !inputs.project }}
-      run: export PROJECT="${{ github.repository }}" | sed 's/.*\///'
+    - run: |
+        repoName=$(echo ${GITHUB_REPOSITORY##*/})
+        echo "REPOSITORY_NAME=$repoName" >> $GITHUB_ENV
       shell: bash
     - name: Zipping solution
-      run: 7z a "$PROJECT-${{ inputs.version }}.zip" -r ../build/*
+      run: 7z a "${{ inputs.project || env.REPOSITORY_NAME }}-${{ inputs.version }}.zip" -r ../build/*
       shell: bash
     - name: Creating release
       uses: softprops/action-gh-release@v1
       with:
         name: ${{ inputs.version }}
-        files: ${{ env.PROJECT }}-${{ inputs.version }}.zip
+        files: ${{ inputs.project || env.REPOSITORY_NAME }}-${{ inputs.version }}.zip
         draft: ${{ inputs.draft }}
         token: ${{ inputs.token }}
         tag_name: ${{ inputs.version }}
