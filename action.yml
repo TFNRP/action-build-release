@@ -1,0 +1,63 @@
+name: 'Build Release'
+description: 'Builds a solution from source and releases it with additional files, including a manifest.'
+inputs:
+  build_only:
+    description: >
+      Skips release.
+    default: false
+    required: false
+  token:
+    description: >
+      Personal access token used to create a release.
+    required: false
+  project:
+    description: >
+      The project name
+    default: ${{ github.repository }}
+    required: false
+  version:
+    description: >
+      This release version
+    default: ${{ github.ref_name }}
+    required: false
+  generate_release_notes:
+    description: >
+      Generate release notes
+    default: false
+    required: false
+  draft:
+    description: >
+      Draft release
+    default: true
+    required: false
+  manifest:
+    description: >
+      Manifest file
+    required: false
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '4.5.2'
+    - name: Building solution
+      run: dotnet build *.sln -c Release -o ../build -v minimal
+    - if: inputs.manifest
+      name: Create resource manifest
+      run: printf "fx_version 'cerulean'\ngame 'gta5'\n\n${{ inputs.manifest }}" > "../build/fxmanifest.lua"
+    - if: inputs.build_only || !startsWith(github.ref, 'refs/tags/')
+      run: exit 0
+    - if: ${{ !inputs.project }}
+      run: export PROJECT="${{ github.repository }}" | sed 's/.*\///'
+    - name: Zipping solution
+      run: 7z a "$PROJECT-${{ inputs.version }}.zip" -r ../build/*
+    - name: Creating release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: ${{ inputs.version }}
+        files: ${{ env.PROJECT }}-${{ inputs.version }}.zip
+        draft: ${{ inputs.draft }}
+        token: ${{ inputs.token }}
+        tag_name: ${{ inputs.version }}
+        generate_release_notes: ${{ inputs.generate_release_notes }}
