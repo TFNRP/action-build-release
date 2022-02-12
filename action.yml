@@ -13,7 +13,6 @@ inputs:
   project:
     description: >
       The project name
-    default: ${{ github.repository }}
     required: false
   version:
     description: >
