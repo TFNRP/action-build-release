@@ -40,7 +40,7 @@ runs:
     - uses: actions/checkout@v2
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '4.5.2'
+        dotnet-version: '6.0.x'
     - name: Building solution
       run: dotnet build *.sln -c Release -o ../build -v minimal
       shell: bash
