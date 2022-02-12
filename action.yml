@@ -57,12 +57,12 @@ runs:
       shell: bash
 
     - name: Zipping solution
-      if: startsWith(github.ref, 'refs/tags/v') && !inputs.build_only
+      if: startsWith(github.ref, 'refs/tags/v') && !inputs.build_only && github.event_name != 'pull_request'
       run: 7z a "${{ inputs.project || env.REPOSITORY_NAME }}-${{ inputs.version }}.zip" -r ../build/*
       shell: bash
 
     - name: Creating release
-      if: startsWith(github.ref, 'refs/tags/v') && !inputs.build_only
+      if: startsWith(github.ref, 'refs/tags/v') && !inputs.build_only && github.event_name != 'pull_request'
       uses: softprops/action-gh-release@v1
       with:
         name: ${{ inputs.version }}
