@@ -43,15 +43,20 @@ runs:
         dotnet-version: '4.5.2'
     - name: Building solution
       run: dotnet build *.sln -c Release -o ../build -v minimal
+      shell: bash
     - if: inputs.manifest
       name: Create resource manifest
       run: printf "fx_version 'cerulean'\ngame 'gta5'\n\n${{ inputs.manifest }}" > "../build/fxmanifest.lua"
+      shell: bash
     - if: inputs.build_only || !startsWith(github.ref, 'refs/tags/')
       run: exit 0
+      shell: bash
     - if: ${{ !inputs.project }}
       run: export PROJECT="${{ github.repository }}" | sed 's/.*\///'
+      shell: bash
     - name: Zipping solution
       run: 7z a "$PROJECT-${{ inputs.version }}.zip" -r ../build/*
+      shell: bash
     - name: Creating release
       uses: softprops/action-gh-release@v1
       with:
