@@ -55,6 +55,12 @@ runs:
       run: printf "fx_version 'cerulean'\ngame 'gta5'\n\n${{ inputs.manifest }}" > "../build/fxmanifest.lua"
       shell: bash
 
+    - run: |
+        echo "Is tag: ${{ startsWith(github.ref, 'refs/tags/v') }}"
+        echo "Build only: ${{ inputs.build_only }}"
+        echo "Is pull request: ${{ github.event_name == 'pull_request' }}"
+      shell: bash
+
     - name: Zipping solution
       if: startsWith(github.ref, 'refs/tags/v') && !inputs.build_only && github.event_name != 'pull_request'
       run: 7z a "${{ inputs.project || env.REPOSITORY_NAME }}-${{ inputs.version }}.zip" -r ../build/*
